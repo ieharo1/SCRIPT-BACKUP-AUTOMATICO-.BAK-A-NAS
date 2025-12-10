@@ -1,0 +1,157 @@
+📘 MANUAL – Ejecución y Automatización del Script auto-backup-zip-nas.ps1
+🟦 1. EJECUTAR EL SCRIPT MANUALMENTE DESDE POWERSHELL
+1.1. Requisitos
+
+Antes de ejecutar el script, verifica:
+
+✔ El archivo existe en:
+C:\Scripts\auto-backup-zip-nas.ps1
+
+✔ PowerShell se abre como Administrador.
+
+1.2. Abrir PowerShell como Administrador
+
+Clic en Inicio
+
+Escribe: PowerShell
+
+Clic derecho → Ejecutar como administrador
+
+1.3. Permitir ejecución temporal del script
+
+Windows Server bloquea scripts por defecto, así que usa:
+
+powershell -ExecutionPolicy Bypass -File "C:\Scripts\auto-backup-zip-nas.ps1"
+
+
+Esto ejecuta el script inmediatamente usando la política Bypass.
+
+1.4. Verificar resultados
+
+Al terminar, revisa en el NAS:
+
+\\182.1.1.23\quifatex\Respaldos BDD_SERQ\
+   BACKUPS MES AÑO\
+       FECHA\
+           *.zip
+
+
+Si aparecen los ZIP, la ejecución fue correcta.
+
+🟩 2. CREAR UNA TAREA AUTOMÁTICA EN WINDOWS SERVER (7 AM DIARIO)
+2.1. Abrir el Programador de Tareas
+
+Tres métodos:
+
+✔ Inicio → escribe Programador de tareas
+✔ Panel de control → Herramientas administrativas
+✔ Ejecutar → taskschd.msc
+
+2.2. Crear una nueva tarea
+
+En el panel derecho:
+
+➡️ Crear tarea…
+(NOT “Crear tarea básica…”)
+
+2.3. Configuración de la pestaña “General”
+
+Nombre:
+Tarea Backup ZIP NAS
+
+Ejecutar tanto si el usuario inició sesión como si no ✔
+
+Ejecutar con los privilegios más altos ✔
+
+Configurar para: Windows Server (tu versión)
+
+2.4. Configuración de la pestaña “Desencadenadores”
+
+Clic en Nuevo…
+
+Configurar:
+
+Iniciar la tarea: Según una programación
+
+Configuración: Diario
+
+Iniciar: 07:00:00 AM
+
+Repetir: No
+
+Vence: Nunca
+
+Clic en Aceptar
+
+2.5. Configuración de la pestaña “Acciones”
+
+Clic en Nuevo…
+
+Configurar:
+
+Acción: Iniciar un programa
+
+Programa o script:
+
+powershell.exe
+
+
+Agregar argumentos:
+
+-ExecutionPolicy Bypass -File "C:\Scripts\auto-backup-zip-nas.ps1"
+
+
+Clic en Aceptar
+
+2.6. Pestaña “Condiciones” (Opcional pero recomendable)
+
+Desmarcar:
+Iniciar la tarea solo si el equipo está conectado a corriente alterna
+
+Marcar:
+Reactivar el equipo para ejecutar esta tarea (si aplica)
+
+2.7. Pestaña “Configuración”
+
+Marca:
+
+✔ Permitir que la tarea se ejecute a petición
+✔ Ejecutar la tarea lo antes posible después de que se haya omitido un inicio programado
+✔ (Opcional) Detener la tarea si se ejecuta más de: 8 horas
+
+2.8. Guardar la tarea
+
+Clic en Aceptar
+
+Windows pedirá usuario y contraseña
+→ Ingresa un usuario administrador del servidor
+
+Confirmar
+
+🟧 3. PROBAR LA TAREA AUTOMÁTICA
+
+En el Programador de Tareas:
+
+Selecciona tu tarea
+
+Panel derecho → Ejecutar
+
+Verifica el NAS para confirmar que:
+
+Se crearon carpetas del mes
+
+Carpeta del día
+
+ZIPs fueron copiados
+
+No hay errores en el script
+
+🟨 4. ¿CÓMO VER LAS TAREAS EXISTENTES?
+
+Desde el Programador:
+
+📌 Panel izquierdo → Biblioteca del Programador de tareas
+
+O desde PowerShell:
+
+Get-ScheduledTask
